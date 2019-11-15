@@ -1,30 +1,14 @@
 const {
-  signIn,
-  signInAnonymously,
-  signUp,
-  refreshToken,
-  getUserData
-} = require("./auth");
-
-const tryGetHttpResponseError = err => {
-  const { response: { data: { error = null } = {} } = {} } = err;
-  return error;
-};
-const removeStackProperty = obj =>
-  Object.getOwnPropertyNames(obj).reduce((acc, key) => {
-    if (key.toLowerCase() !== "stack") {
-      acc[key] = obj[key];
-      return acc;
-    } else return acc;
-  }, {});
-
-const sendErrorResponse = (res, err) =>
-  res
-    .status(400)
-    .send(tryGetHttpResponseError(err) || removeStackProperty(err));
+    signIn,
+    signInAnonymously,
+    signUp,
+    refreshToken,
+    getUserData
+  } = require("../auth"),
+  { sendErrorResponse } = require("./helpers");
 
 module.exports = {
-  posts: [
+  POSTS: [
     [
       "/signIn",
       async function(req, res) {
@@ -59,7 +43,9 @@ module.exports = {
       "/refreshToken",
       async function(req, res) {
         try {
-          res.jsonp(await refreshToken(req.body.refreshToken));
+          res.jsonp(
+            await refreshToken(req.body.refreshToken || req.body.refresh_token)
+          );
         } catch (err) {
           sendErrorResponse(res, err);
         }
@@ -69,7 +55,9 @@ module.exports = {
       "/getUserData",
       async function(req, res) {
         try {
-          res.jsonp(await getUserData(req.body.idToken));
+          res.jsonp(
+            await getUserData(req.body.idToken || req.body.access_token)
+          );
         } catch (err) {
           sendErrorResponse(res, err);
         }
